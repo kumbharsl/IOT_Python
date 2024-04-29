@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:agreeculture/home/home.dart';
+import 'package:agreeculture/main.dart';
 import 'package:agreeculture/model/login_model.dart';
 import 'package:agreeculture/screens/forgot_screen.dart';
 import 'package:agreeculture/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:agreeculture/screens/signup_screen.dart';
+import 'package:flutter/widgets.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -19,21 +23,21 @@ Future<void> insertData(LoginModel obj) async {
   );
 }
 
-Future<List> retData() async {
-  final localDB = await database;
-  List retList = await localDB.query("Sign");
-  return List.generate(
-    retList.length,
-    (i) {
-      return LoginModel(
-        name: retList[i]['name'],
-        phone: retList[i]['phone'],
-        email: retList[i]['email'],
-        password: retList[i]['password'],
-      );
-    },
-  );
-}
+// Future<List> retData() async {
+//   final localDB = await database;
+//   List retList = await localDB.query("Sign");
+//   return List.generate(
+//     retList.length,
+//     (i) {
+//       return LoginModel(
+//         name: retList[i]['name'],
+//         phone: retList[i]['phone'],
+//         email: retList[i]['email'],
+//         password: retList[i]['password'],
+//       );
+//     },
+//   );
+// }
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -43,6 +47,8 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreen extends State<SignInScreen> {
   final _formSignInKey = GlobalKey<FormState>();
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
   bool rememberPassword = true;
   @override
   Widget build(BuildContext context) {
@@ -84,6 +90,7 @@ class _SignInScreen extends State<SignInScreen> {
                         height: 40.0,
                       ),
                       TextFormField(
+                        controller: email,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter Email';
@@ -114,6 +121,7 @@ class _SignInScreen extends State<SignInScreen> {
                         height: 25.0,
                       ),
                       TextFormField(
+                        controller: password,
                         obscureText: true,
                         obscuringCharacter: '*',
                         validator: (value) {
@@ -193,33 +201,74 @@ class _SignInScreen extends State<SignInScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            if (_formSignInKey.currentState!.validate() &&
-                                rememberPassword) {
+                            bool checkValidation =
+                                _formSignInKey.currentState!.validate();
+                            if (checkValidation) {
+                              bool flag = false;
+                              for (int i = 0; i < data.length; i++) {
+                                if (data[i].emailId == email.text &&
+                                    data[i].password == password.text) {
+                                  flag = true;
+                                }
+                              }
+                              if (flag == true) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    backgroundColor: Colors.white,
+                                    content: Text(
+                                      'Login Succesfull',
+                                      style: TextStyle(
+                                          color: Colors.green,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (e) => const HomeScreen(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'Please enter valid email & password')),
+                                );
+                              }
+                              //   ScaffoldMessenger.of(context).showSnackBar(
+                              //     const SnackBar(
+                              //       backgroundColor: Colors.white,
+                              //       content: Text(
+                              //         'Login Succesfull',
+                              //         style: TextStyle(
+                              //             color: Colors.green,
+                              //             fontSize: 17,
+                              //             fontWeight: FontWeight.bold),
+                              //       ),
+                              //     ),
+                              //   );
+                              //   Navigator.pushReplacement(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //       builder: (e) => const HomeScreen(),
+                              //     ),
+                              //   );
+                            } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: Colors.red,
                                   content: Text(
-                                    'Login Succesfull',
-                                    style: TextStyle(
-                                        color: Colors.green,
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold),
+                                    'Please Enter Email & Password',
                                   ),
                                 ),
                               );
-                            } else if (!rememberPassword) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Please agree to the processing of personal data')),
-                              );
                             }
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (e) => const HomeScreen(),
-                              ),
-                            );
+
+                            // if (_formSignInKey.currentState!.validate() &&
+                            //     rememberPassword) {
+                            // } else if (!rememberPassword) {}
                           },
                           child: const Text('Sign In'),
                         ),

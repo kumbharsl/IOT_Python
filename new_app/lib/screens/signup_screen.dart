@@ -2,6 +2,8 @@ import 'package:agreeculture/screens/login_screen.dart';
 import 'package:agreeculture/widgets/custom_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:icons_plus/icons_plus.dart';
+import 'package:agreeculture/main.dart';
+// import 'package:path/path.dart';
 
 class SignUnScreen extends StatefulWidget {
   const SignUnScreen({super.key});
@@ -15,9 +17,9 @@ class _SignUnScreen extends State<SignUnScreen> {
   String email = '';
   String password = '';
 
-  TextEditingController namecontroller = new TextEditingController();
-  TextEditingController emailcontroller = new TextEditingController();
-  TextEditingController passwordcontroller = new TextEditingController();
+  TextEditingController namecontroller = TextEditingController();
+  TextEditingController emailcontroller = TextEditingController();
+  TextEditingController passwordcontroller = TextEditingController();
   final _formSignupKey = GlobalKey<FormState>();
   bool agreePersonalData = true;
 
@@ -194,14 +196,38 @@ class _SignUnScreen extends State<SignUnScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formSignupKey.currentState!.validate() &&
                                 agreePersonalData) {
+                              final obj = SignUp(
+                                emailId: emailcontroller.text.trim(),
+                                password: passwordcontroller.text.trim(),
+                                fullName: namecontroller.text.trim(),
+                              );
+                              insertSignUpData(obj);
+                              data = await getSignUpData();
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text('Resister Succesfull'),
                                 ),
                               );
+
+                              namecontroller.clear();
+                              emailcontroller.clear();
+                              passwordcontroller.clear();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const SignInScreen()),
+                              );
+                              // Navigator.replace(
+                              //   context,
+                              //   oldRoute: MaterialPageRoute(
+                              //       builder: (context) => const SignInScreen()),
+                              //   newRoute: MaterialPageRoute(
+                              //       builder: (context) => const SignUnScreen()),
+                              // );
                             } else if (!agreePersonalData) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
